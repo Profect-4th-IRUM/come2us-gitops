@@ -1,0 +1,31 @@
+# Ignore Kubernetes secret manifests, especially if not using a secure solution like Sealed Secrets or Vault
+# If using Sealed Secrets, you would commit the sealed secret manifest and ignore the original secret manifest.
+# For example:
+secret-*.yaml
+*-secret.yaml
+secrets/
+
+# Ignore local configuration files or temporary files
+# For example, if you have local development overrides:
+kustomization.local.yaml
+*.tmp
+*.bak
+
+# Ignore build artifacts or generated files
+# If you are using tools that generate manifests, ignore their output if not intended for version control.
+# For example, if Kustomize builds output to a specific directory:
+build/
+dist/
+
+# Ignore specific files or directories used by development tools
+.idea/ # For IntelliJ IDEA
+.vscode/ # For VS Code
+.DS_Store # For macOS
+Thumbs.db # For Windows
+
+# Ignore logs
+*.log
+
+# Ignore environment-specific configuration if not managed by a secure mechanism
+.env
+config.env

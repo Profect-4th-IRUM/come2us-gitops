@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-gateway
+  template:
+    metadata:
+      labels:
+        app: api-gateway
+    spec:
+      imagePullSecrets:
+        - name: ecr-secret
+      containers:
+        - name: api-gateway
+          image: 997784788329.dkr.ecr.ap-northeast-2.amazonaws.com/come2us-gateway:latest
+          ports:
+            - containerPort: 8080
+          env:
+            # Spring Profile
+            - name: PROFILE_ACTIVE
+              value: "prod"
+
+            # Config Server
+            - name: CONFIG_SERVER_URL
+              value: "http://config-server:8888"
+
+            # Eureka
+            - name: EUREKA_HOST
+              value: "eureka"
+            - name: EUREKA_PORT
+              value: "8761"
+
+            # Gateway self-hostname (CloudMap → K8s DNS)
+            - name: GATEWAY_HOSTNAME
+              value: "api-gateway"
+            - name: GATEWAY_PORT
+              value: "8080"
+
+            # --- JWT Secret (SSM → Kubernetes Secret)
+            - name: JWT_ACCESS_TOKEN_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: gateway-secret
+                  key: jwt-access-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-gateway
+spec:
+  type: LoadBalancer
+  selector:
+    app: api-gateway
+  ports:
+    - port: 80
+      targetPort: 8080

@@ -1,0 +1,72 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: come2us-virtualservice
+  namespace: come2us
+spec:
+  hosts:
+    - "*"
+  gateways:
+    - come2us-gateway
+  http:
+    # MEMBER SERVICE
+    - match:
+        - uri:
+            prefix: "/members/"
+        - uri:
+            prefix: "/managers/"
+        - uri:
+            prefix: "/auth/"
+      route:
+        - destination:
+            host: member-service
+            port:
+              number: 8080
+
+    # PRODUCT SERVICE
+    - match:
+        - uri:
+            prefix: "/products/"
+        - uri:
+            prefix: "/stores/"
+        - uri:
+            prefix: "/carts/"
+        - uri:
+            prefix: "/reviews/"
+        - uri:
+            prefix: "/discounts/"
+        - uri:
+            prefix: "/delivery-policies/"
+        - uri:
+            prefix: "/categories/"
+      route:
+        - destination:
+            host: product-service
+            port:
+              number: 8080
+
+    # ORDER SERVICE
+    - match:
+        - uri:
+            prefix: "/orders/"
+        - uri:
+            prefix: "/refunds/"
+        - uri:
+            prefix: "/address/"
+        - uri:
+            prefix: "/coupons/"
+      route:
+        - destination:
+            host: order-service
+            port:
+              number: 8080
+
+    # PAYMENT SERVICE
+    - match:
+        - uri:
+            prefix: "/payments/"
+      route:
+        - destination:
+            host: payment-service
+            port:
+              number: 8080

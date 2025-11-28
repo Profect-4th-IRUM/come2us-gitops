@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jwks-config
+  namespace: jwks
+data:
+  jwks.json: |
+    {
+      "keys": [
+        {
+          "kty": "oct",
+          "kid": "come2us-access-key",
+          "use": "sig",
+          "alg": "HS256",
+          "k": "b-GWJvwvLh5mVY2cmJY_VFTOtpW_z9iw1aAahFwZxO__LxbOficX1NCG6Q9i7j0ZWQOjsj3WNxSVbkJD4cafnw"
+        },
+        {
+          "kty": "oct",
+          "kid": "come2us-refresh-key",
+          "use": "sig",
+          "alg": "HS256",
+          "k": "AIXg_ZNrErtaEuMvXbCbs-9-VvrcshZi88QPtMeCb3TY9GvmWhW7-tDotHDbqPrJVHy8AVEzuYREUf6l8CDUuw"
+        }
+      ]
+    }

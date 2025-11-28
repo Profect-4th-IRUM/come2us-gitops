@@ -1,0 +1,36 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: come2us-claims-header
+  namespace: istio-system
+spec:
+  workloadSelector:
+    labels:
+      istio: ingressgateway
+  configPatches:
+    - applyTo: HTTP_FILTER
+      match:
+        context: GATEWAY
+      patch:
+        operation: INSERT_BEFORE
+        value:
+          name: envoy.filters.http.lua
+          typed_config:
+            "@type": "type.googleapis.com/envoy.extensions.filters.http.lua.v3.Lua"
+            inline_code: |
+              function envoy_on_request(handle)
+                local payload = handle:jwtPayload()
+                if payload == nil then
+                  return
+                end
+
+                local sub = payload["sub"]
+                local role = payload["authority"]
+
+                if sub ~= nil then
+                  handle:headers():add("X-Member-Id", sub)
+                end
+                if role ~= nil then
+                  handle:headers():add("X-Role", role)
+                end
+              end

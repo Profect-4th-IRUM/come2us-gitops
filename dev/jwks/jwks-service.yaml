@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: jwks-service
+  namespace: jwks
+spec:
+  type: ClusterIP
+  selector:
+    app: jwks-server
+  ports:
+    - port: 80
+      targetPort: 80

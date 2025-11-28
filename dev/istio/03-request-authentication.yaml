@@ -1,0 +1,9 @@
+apiVersion: security.istio.io/v1beta1
+kind: RequestAuthentication
+metadata:
+  name: come2us-jwt-auth
+  namespace: come2us
+spec:
+  jwtRules:
+    - issuer: "come2us"
+      jwksUri: "http://jwt-server.jwks.svc.cluster.local/jwks.json"

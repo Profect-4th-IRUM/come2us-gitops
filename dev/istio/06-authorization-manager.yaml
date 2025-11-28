@@ -1,0 +1,11 @@
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: come2us-manager-access
+  namespace: come2us
+spec:
+  rules:
+    - when:
+        - key: request.auth.claims[authority]
+          values:
+            - "ROLE_MANAGER"
