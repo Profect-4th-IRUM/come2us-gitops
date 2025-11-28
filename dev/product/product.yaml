@@ -38,7 +38,7 @@ spec:
 
             # --- DB
             - name: WRITE_POSTGRESQL_HOST
-              value: "postgres"
+              value: "postgres.db"
             - name: WRITE_POSTGRESQL_PORT
               value: "5432"
             - name: WRITE_DB_NAME
@@ -47,7 +47,7 @@ spec:
               value: "come2us"
 
             - name: READ_POSTGRESQL_HOST
-              value: "postgres"
+              value: "postgres.db"
             - name: READ_POSTGRESQL_PORT
               value: "5432"
             - name: READ_DB_NAME
@@ -57,11 +57,11 @@ spec:
 
             # --- Redis
             - name: DATA_REDIS_HOST
-              value: "session-redis"
+              value: "session-redis.db"
             - name: DATA_REDIS_PORT
               value: "6379"
             - name: CACHE_REDIS_HOST
-              value: "cache-redis"
+              value: "cache-redis.db"
             - name: CACHE_REDIS_PORT
               value: "6379"
 
