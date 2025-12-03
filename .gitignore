@@ -1,0 +1,3 @@
+# 🔐 모든 secret 파일 제외
+secrets/*.yaml
+secrets/*.yml

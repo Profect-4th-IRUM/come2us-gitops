@@ -1,0 +1,101 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-service
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: ai-service
+  template:
+    metadata:
+      labels:
+        app: ai-service
+    spec:
+      imagePullSecrets:
+        - name: ecr-secret
+      containers:
+        - name: ai-service
+          image: 997784788329.dkr.ecr.ap-northeast-2.amazonaws.com/come2us-product:latest
+          ports:
+            - containerPort: 8085
+          env:
+            - name: PROFILE_ACTIVE
+              value: "prod"
+
+            - name: CONFIG_SERVER_URL
+              value: "http://config-server:8888"
+
+            - name: AI_HOSTNAME
+              value: "product-service"
+            - name: AI_PORT
+              value: "8085"
+
+            # --- DB
+            - name: WRITE_POSTGRESQL_HOST
+              value: "postgres"
+            - name: WRITE_POSTGRESQL_PORT
+              value: "5432"
+            - name: WRITE_DB_NAME
+              value: "come2us"
+            - name: WRITE_POSTGRESQL_USERNAME
+              value: "come2us"
+
+            - name: READ_POSTGRESQL_HOST
+              value: "postgres"
+            - name: READ_POSTGRESQL_PORT
+              value: "5432"
+            - name: READ_DB_NAME
+              value: "come2us"
+            - name: READ_POSTGRESQL_USERNAME
+              value: "come2us"
+
+            # --- Redis
+            - name: DATA_REDIS_HOST
+              value: "session-redis"
+            - name: DATA_REDIS_PORT
+              value: "6379"
+            - name: CACHE_REDIS_HOST
+              value: "cache-redis"
+            - name: CACHE_REDIS_PORT
+              value: "6379"
+
+            # --- JWT (Secret)
+            - name: JWT_ACCESS_TOKEN_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: ai-secret
+                  key: jwt-access-secret
+
+            - name: JWT_REFRESH_TOKEN_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: ai-secret
+                  key: jwt-refresh-secret
+
+            # --- PASSWORDS
+            - name: WRITE_POSTGRESQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ai-secret
+                  key: write-db-password
+
+            - name: READ_POSTGRESQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ai-secret
+                  key: read-db-password
+
+            - name: DATA_REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: product-secret
+                  key: redis-password
+
+            # --- JWT Info
+            - name: JWT_ACCESS_TOKEN_EXPIRATION_TIME
+              value: "3600"
+            - name: JWT_REFRESH_TOKEN_EXPIRATION_TIME
+              value: "604800"
+            - name: JWT_ISSUER
+              value: "irum"
