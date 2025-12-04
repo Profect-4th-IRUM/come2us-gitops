@@ -3,10 +3,15 @@ kind: EC2NodeClass
 metadata:
   name: default
 spec:
-  amiFamily: AL2
+  amiFamily: AL2023
 
-  role: arn:aws:iam::997784788329:role/come2us-eks-karpenter-node      # module.iam.karpenter_node_role_arn
-  instanceProfile: come2us-eks-karpenter-node                           # module.iam.karpenter_node_instance_profile_name
+  bootstrap:
+    containerRuntime: containerd
+    kubeletConfig:
+      maxPods: 110
+
+  role: arn:aws:iam::997784788329:role/come2us-eks-karpenter-node
+  instanceProfile: come2us-eks-karpenter-node
 
   subnetSelectorTerms:
     - tags:
@@ -14,5 +19,6 @@ spec:
   securityGroupSelectorTerms:
     - tags:
         karpenter.sh/discovery: come2us-eks
+
   tags:
     karpenter.sh/discovery: come2us-eks

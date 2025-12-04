@@ -34,9 +34,9 @@ spec:
 
   limits:
     cpu: "1000"
-    memory: "1000Gi"
+    memory: 1000Gi
     nodes: 10
 
   disruption:
     consolidationPolicy: WhenEmpty
-    consolidateAfter: "30s"
+    consolidateAfter: 30s
