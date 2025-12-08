@@ -4,7 +4,9 @@ metadata:
   name: {{ include "member-service.fullname" . }}
   namespace: {{ .Values.namespace }}
 spec:
+  {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
+  {{- end }}
   selector:
     matchLabels:
       app: {{ include "member-service.name" . }}
