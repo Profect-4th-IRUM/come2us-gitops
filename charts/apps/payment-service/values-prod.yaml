@@ -1,0 +1,27 @@
+image:
+  tag: "601edda"
+
+config:
+  PROFILE_ACTIVE: "prod"
+  WRITE_POSTGRESQL_HOST: "come2us-db-primary.cximq62ioqkt.ap-northeast-2.rds.amazonaws.com"
+  READ_POSTGRESQL_HOST: "come2us-db-replica.cximq62ioqkt.ap-northeast-2.rds.amazonaws.com"
+  CACHE_REDIS_HOST: "come2us-cache-redis.bmp23x.0001.apn2.cache.amazonaws.com"
+  KAFKA_BOOTSTRAP_SERVERS: "b-2.come2usmsk.d3jimf.c2.kafka.ap-northeast-2.amazonaws.com:9094,b-4.come2usmsk.d3jimf.c2.kafka.ap-northeast-2.amazonaws.com:9094,b-1.come2usmsk.d3jimf.c2.kafka.ap-northeast-2.amazonaws.com:9094"
+  NUM_OF_PARTITION: 3
+  NUM_OF_REPLICA: 3
+  PAYMENT_PAID_TOPIC_NAME: "payment-paid"
+  PAYMENT_FAILED_TOPIC_NAME: "payment-failed"
+
+resources:
+  requests:
+    cpu: "300m"
+    memory: "512Mi"
+  limits:
+    cpu: "1000m"
+    memory: "1536Mi"
+
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 55
