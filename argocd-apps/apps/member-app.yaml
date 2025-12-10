@@ -1,28 +1,35 @@
-project: default
-source:
-  repoURL: 'https://github.com/Profect-4th-IRUM/come2us-gitops.git'
-  path: charts/apps/member-service
-  targetRevision: develop
-  helm:
-    valueFiles:
-      - values-prod.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: member-service
+  namespace: argo
+spec:
+  project: default
 
-destination:
-  server: 'https://kubernetes.default.svc'
-  namespace: come2us
+  source:
+    repoURL: 'https://github.com/Profect-4th-IRUM/come2us-gitops.git'
+    path: charts/apps/member-service
+    targetRevision: develop
+    helm:
+      valueFiles:
+        - values-prod.yaml
 
-syncPolicy:
-  automated:
-    prune: true
-    selfHeal: true
-  syncOptions:
-    - CreateNamespace=true
-    - ServerSideApply=true
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: come2us
 
-ignoreDifferences:
-  - group: external-secrets.io
-    kind: ExternalSecret
-    jsonPointers:
-      - /status
-      - /metadata/annotations
-      - /spec/data
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+
+  ignoreDifferences:
+    - group: external-secrets.io
+      kind: ExternalSecret
+      jsonPointers:
+        - /status
+        - /metadata/annotations
+        - /spec/data
