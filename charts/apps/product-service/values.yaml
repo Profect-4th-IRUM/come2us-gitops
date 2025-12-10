@@ -55,6 +55,12 @@ config:
   CACHE_REDIS_HOST: "cache-redis.db.svc.cluster.local"
   CACHE_REDIS_PORT: "6379"
 
+  KAFKA_BOOTSTRAP_SERVERS: "kafka.kafka.svc.cluster.local:9092"
+  PRODUCT_GROUP_ID: "product-service-group"
+  NUM_OF_PARTITION: 3
+  NUM_OF_REPLICA: 3
+  ORDER_FAILED_TOPIC_NAME: "order-failed"
+
 autoscaling:
   enabled: false
   minReplicas: 2
