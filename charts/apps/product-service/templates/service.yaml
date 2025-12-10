@@ -3,6 +3,8 @@ kind: Service
 metadata:
   name: {{ include "product-service.fullname" . }}
   namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ include "product-service.name" . }}
 spec:
   selector:
     app: {{ include "product-service.name" . }}
