@@ -1,5 +1,10 @@
 namespace: "come2us"
 
+monitor:
+  namespace: "monitoring"
+  labels:
+    release: kube-prometheus
+
 prefix: "come2us"
 
 secretStore:
@@ -19,6 +24,7 @@ container:
 service:
   port: 8082
   type: ClusterIP
+  portName: http-metrics
 
 resources:
   requests:
