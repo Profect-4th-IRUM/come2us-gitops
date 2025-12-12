@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka-connect
+  namespace: kafka-connect
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka-connect
+  template:
+    metadata:
+      labels:
+        app: kafka-connect
+    spec:
+      containers:
+        - name: kafka-connect
+          # S3 커넥터 포함된 커스텀 이미지
+          image: kafka-connect-s3:local
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - containerPort: 8083
+
+          envFrom:
+            - secretRef:
+                name: kafka-connect-secret
+
+          env:
+            # 🔹 preflight(kafka-ready)에서 쓰는 bootstrap.servers
+            - name: BOOTSTRAP_SERVERS
+              value: "kafka.kafka.svc.cluster.local:9092"
+
+            # 🔹 Connect 워커 설정
+            - name: CONNECT_BOOTSTRAP_SERVERS
+              value: "kafka.kafka.svc.cluster.local:9092"
+
+            - name: CONNECT_GROUP_ID
+              value: "kafka-connect-cluster"
+
+            - name: CONNECT_CONFIG_STORAGE_TOPIC
+              value: "connect-configs"
+            - name: CONNECT_OFFSET_STORAGE_TOPIC
+              value: "connect-offsets"
+            - name: CONNECT_STATUS_STORAGE_TOPIC
+              value: "connect-status"
+
+            - name: CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR
+              value: "1"
+            - name: CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR
+              value: "1"
+            - name: CONNECT_STATUS_STORAGE_REPLICATION_FACTOR
+              value: "1"
+
+            # REST 포트 (안 줘도 기본 8083이지만 명시)
+            - name: CONNECT_REST_PORT
+              value: "8083"
+
+            # 예전에 쓰던 값이랑 최대한 비슷하게
+            - name: CONNECT_REST_ADVERTISED_HOST_NAME
+              value: "kafka-connect"
+
+            # JSON 컨버터 + 스키마 비활성화 (예전 설정 유지)
+            - name: CONNECT_KEY_CONVERTER
+              value: "org.apache.kafka.connect.json.JsonConverter"
+            - name: CONNECT_VALUE_CONVERTER
+              value: "org.apache.kafka.connect.json.JsonConverter"
+            - name: CONNECT_KEY_CONVERTER_SCHEMAS_ENABLE
+              value: "false"
+            - name: CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE
+              value: "false"
+
+            - name: CONNECT_INTERNAL_KEY_CONVERTER
+              value: "org.apache.kafka.connect.json.JsonConverter"
+            - name: CONNECT_INTERNAL_VALUE_CONVERTER
+              value: "org.apache.kafka.connect.json.JsonConverter"
+
+            # 🔥 S3 커넥터 위치만 정확하게
+            - name: CONNECT_PLUGIN_PATH
+              value: "/usr/share/confluent-hub-components"
+
+            - name: CONNECT_TASKS_MAX
+              value: "2"

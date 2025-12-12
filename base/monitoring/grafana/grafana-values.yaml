@@ -1,0 +1,40 @@
+adminUser: admin
+adminPassword: admin123
+
+service:
+  type: NodePort
+  nodePort: 30080
+
+# Grafana provisioning
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+      - name: Loki
+        type: loki
+        access: proxy
+        isDefault: true
+        url: http://loki.logging.svc.cluster.local:3100
+        jsonData:
+          maxLines: 5000
+
+      - name: Tempo
+        type: tempo
+        access: proxy
+        url: http://tempo.logging.svc.cluster.local:3200
+        jsonData:
+          httpMethod: GET
+
+      - name: Prometheus
+        type: prometheus
+        access: proxy
+        url: http://kube-prometheus-kube-prome-prometheus.logging.svc:9090
+
+grafana:
+  sidecar:
+    dashboards:
+      enabled: true
+    datasources:
+      enabled: true
+      label: grafana_datasource
+      labelValue: "1"

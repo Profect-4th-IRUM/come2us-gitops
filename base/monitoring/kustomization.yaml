@@ -1,0 +1,7 @@
+resources:
+  - ./loki
+  - ./promtail
+  - ./grafana
+  - ./tempo
+  - ./fluentbit
+  - ./otel-collector

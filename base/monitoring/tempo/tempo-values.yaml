@@ -1,0 +1,11 @@
+mode: monolithic
+
+tempo:
+  receivers:
+    otlp:
+      protocols:
+        grpc: {}
+        http: {}
+
+service:
+  type: ClusterIP

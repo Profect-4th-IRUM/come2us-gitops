@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: otel-collector
+  namespace: istio-system
+spec:
+  selector:
+    app: otel-collector
+  ports:
+    - name: zipkin
+      port: 9411
+      targetPort: 9411
+    - name: otlp
+      port: 4317
+      targetPort: 4317

@@ -1,0 +1,55 @@
+promtail:
+  enabled: true
+
+config:
+  server:
+    http_listen_port: 3101
+    grpc_listen_port: 0
+
+  positions:
+    filename: /run/promtail-kafka/positions.yaml
+
+  clients:
+    - url: http://loki.logging.svc.cluster.local:3100/loki/api/v1/push
+
+  limits_config:
+    readline_rate: 20000
+    readline_burst: 20000
+
+  scrape_configs:
+    - job_name: kafka-app-logs
+      kafka:
+        brokers: ["kafka.kafka.svc.cluster.local:9092"]
+        topics: ["app-logs"]
+        group_id: promtail-app-logs-group
+        labels:
+          job: "kafka-app-logs"
+
+      relabel_configs:
+        - source_labels: ['service']
+          target_label: 'service'
+        - source_labels: ['level']
+          target_label: 'level'
+        - source_labels: ['env']
+          target_label: 'env'
+
+      pipeline_stages:
+        - json:
+            expressions:
+              timestamp: '@timestamp'
+              level: level
+              message: message
+              trace: trace_id
+
+        - timestamp:
+            source: timestamp
+            format: RFC3339
+
+        - labels:
+            level:
+            trace:
+            service:
+            env:
+
+serviceMonitor:
+  enabled: false
