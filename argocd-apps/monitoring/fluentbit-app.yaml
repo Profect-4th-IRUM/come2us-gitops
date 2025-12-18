@@ -65,9 +65,9 @@ spec:
             [OUTPUT]
                 Name          loki
                 Match         *
-                Host          loki.monitoring.svc.cluster.local
+                Host          loki-write.monitoring.svc.cluster.local
                 Port          3100
-                Labels        job=fluent-bit,namespace=logging
+                Labels        job=fluent-bit,namespace=monitoring
                 Line_Format   json
                 auto_kubernetes_labels  On
 
