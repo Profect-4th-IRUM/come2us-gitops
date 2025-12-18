@@ -1,0 +1,91 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otel-collector-config
+  namespace: istio-system
+data:
+  config.yaml: |
+    receivers:
+      zipkin: # Istio, Envoy 자체가 기본적으로 Zipkin 포맷으로 트레이스 export 가능
+      otlp: # Java OTel Agent가 OTLP(gRPC)로 trace 전송 / EnvoyFilter도 OTLP 사용 가능
+        protocols:
+          grpc:
+          http:
+
+    processors:
+      batch: # Tempo에 보내기 전에 스팬들을 묶어서 전송. / 성능 최적화 + 데이터 손실 방지.
+
+    exporters:
+      otlp:
+        endpoint: tempo.monitoring.svc.cluster.local:4317 #Tempo로 전송 
+        tls:
+          insecure: true #insecure: true
+
+      logging:
+        loglevel: debug # Collector가 받아서 처리하는 스팬을 stdout 로그로 출력
+
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp, zipkin]
+          processors: [batch]
+          exporters: [otlp, logging]
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: otel-collector
+  namespace: istio-system
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: otel-collector
+  template:
+    metadata:
+      labels:
+        app: otel-collector
+    spec:
+      nodeSelector:
+        node_type: "infra"
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: node_type
+                    operator: In
+                    values: ["infra"]
+      tolerations:
+        - key: "node_type"
+          operator: "Equal"
+          value: "infra"
+          effect: "NoSchedule"
+      containers:
+        - name: otel-collector
+          image: otel/opentelemetry-collector-contrib:0.99.0
+          args: ["--config=/etc/otel/config.yaml"]
+          volumeMounts:
+            - name: otel-config
+              mountPath: /etc/otel
+      volumes:
+        - name: otel-config
+          configMap:
+            name: otel-collector-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: otel-collector
+  namespace: istio-system
+spec:
+  ports:
+    - port: 9411 # Envoy (Ingress, Sidecar)가 Collector로 보내는 Zipkin 데이터
+      name: zipkin
+      targetPort: 9411
+    - port: 4317 # Java OTel Agent 및 EnvoyFilter에서 otlp gRPC 로 보내는 데이터
+      name: otlp
+      targetPort: 4317
+  selector:
+    app: otel-collector
