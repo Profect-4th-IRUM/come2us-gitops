@@ -1,0 +1,22 @@
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: come2us-customer-access-member
+  namespace: come2us
+spec:
+  selector:
+    matchLabels:
+      app: member-service
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            requestPrincipals: ["*"]
+      to:
+        - operation:
+            methods: ["PATCH"]
+            paths:
+              - /members/role  # 역할 변경
+      when:
+        - key: request.auth.claims[authority]
+          values: ["CUSTOMER"]

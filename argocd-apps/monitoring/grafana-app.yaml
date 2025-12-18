@@ -20,6 +20,16 @@ spec:
         adminUser: admin
         adminPassword: admin123
 
+        grafana.ini:
+          server:
+            root_url: "https://grafana.come2us.store"
+            serve_from_sub_path: true
+          session:
+            provider: redis
+            provider_config: "addr=redis-master.monitoring.svc.cluster.local:6379,password=M0rAuHMl75,db=2,pool_size=100"
+            cookie_secure: true
+            cookie_samesite: none
+
         # Grafana를 ALB로 노출하므로 NodePort 불필요
         service:
           type: ClusterIP
@@ -57,11 +67,15 @@ spec:
               - name: Loki
                 type: loki
                 access: proxy
-                url: http://loki.monitoring.svc.cluster.local:3100
+                url: http://loki-gateway.monitoring.svc.cluster.local # gateway는 80 port 사용
+                jsonData:
+                  httpHeaderName1: "X-Scope-OrgID"
+                secureJsonData:
+                  httpHeaderValue1: "1"
               - name: Tempo
                 type: tempo
                 access: proxy
-                url: http://tempo.monitoring.svc.cluster.local:3200
+                url: http://tempo.monitoring.svc.cluster.local:3100
                 jsonData:
                   httpMethod: GET
               - name: Prometheus

@@ -1,0 +1,41 @@
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: come2us-public-access
+  namespace: come2us
+spec:
+  action: ALLOW
+  rules:
+    # 로그인, 회원가입 등
+    - to:
+        - operation:
+            methods: ["POST"]
+            paths:
+              - /auth/login
+              - /auth/logout
+              - /members/signup
+              - /members/owner-signup
+
+    # GET 요청 (조회) - 인증 불필요
+    - to:
+        - operation:
+            methods: ["GET"]
+            paths:
+              - /categories
+              - /categories/*
+              - /products/*/discounts
+              - /stores/*/discounts
+              - /products
+              - /products/*
+              - /reviews/products/*
+              - /stores
+              - /stores/*
+
+    # Actuator
+    - to:
+        - operation:
+            paths:
+              - /actuator
+              - /actuator/*
+              - /httpbin
+              - /httpbin/*  # 테스트용
