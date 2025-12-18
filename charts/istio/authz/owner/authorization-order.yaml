@@ -1,0 +1,50 @@
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: come2us-owner-access-order
+  namespace: come2us
+spec:
+  selector:
+    matchLabels:
+      app: order-service
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            requestPrincipals: ["*"]
+      to:
+        - operation:
+            methods: ["GET"]
+            paths:
+              - /coupons
+              - /address/{*}/info
+              - /orders/{*}/sales
+              - /orders/{*}/balance
+              - /refunds/{*}/detail
+              - /refunds/list
+        
+        - operation:
+            methods: ["POST"]
+            paths:
+              - /coupons
+              - /refunds/*
+
+        - operation:
+            methods: ["PATCH"]
+            paths:
+              - /refunds/*
+
+        - operation:
+            methods: ["DELETE"]
+            paths:
+              - /coupons/*
+              
+
+        - operation:
+            methods: ["GET", "POST", "PATCH", "PUT", "DELETE"]
+            paths:
+              - /orders/owner/*
+
+      when:
+        - key: request.auth.claims[authority]
+          values: ["OWNER"]

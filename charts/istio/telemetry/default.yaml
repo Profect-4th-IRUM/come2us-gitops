@@ -1,0 +1,13 @@
+apiVersion: telemetry.istio.io/v1
+kind: Telemetry
+metadata:
+  name: default
+  namespace: come2us
+spec:
+  accessLogging:
+    - providers:
+        - name: envoy
+
+  metrics:
+    - providers:
+        - name: prometheus

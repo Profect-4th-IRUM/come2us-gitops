@@ -1,0 +1,35 @@
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: come2us-manager-access-deny
+  namespace: come2us
+spec:
+  action: DENY
+  rules:
+    - from:
+        - source:
+            requestPrincipals: ["*"]
+      to:
+        - operation:
+            methods: ["GET"]
+            paths:
+              - /managers
+              - /managers/*
+
+        - operation:
+            methods: ["POST"]
+            paths:
+              - /managers/signup
+        
+        - operation:
+            methods: ["PATCH"]
+            paths:
+              - /managers/*/info
+
+        - operation:
+            methods: ["DELETE"]
+            paths:
+              - /managers/*
+      when:
+        - key: request.auth.claims[authority]
+          values: ["MANAGER"]

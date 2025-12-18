@@ -1,0 +1,38 @@
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: come2us-master-access-member
+  namespace: come2us
+spec:
+  selector:
+    matchLabels:
+      app: member-service
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            requestPrincipals: ["*"]
+      to:
+        - operation:
+            methods: ["GET"]
+            paths:
+              - /managers
+              - /managers/*
+
+        - operation:
+            methods: ["POST"]
+            paths:
+              - /managers/signup
+        
+        - operation:
+            methods: ["PATCH"]
+            paths:
+              - /managers/*/info
+
+        - operation:
+            methods: ["DELETE"]
+            paths:
+              - /managers/*
+      when:
+        - key: request.auth.claims[authority]
+          values: ["MASTER"]
