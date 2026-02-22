@@ -1,10 +1,10 @@
-# apiVersion: networking.istio.io/v1
-# kind: DestinationRule
-# metadata:
-#   name: mtls-default
-#   namespace: come2us
-# spec:
-#   host: "*.svc.cluster.local"
-#   trafficPolicy:
-#     tls:
-#       mode: ISTIO_MUTUAL
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: mtls-default
+  namespace: come2us
+spec:
+  host: "*.come2us.svc.cluster.local"
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL

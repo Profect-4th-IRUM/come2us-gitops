@@ -5,4 +5,4 @@ metadata:
   namespace: come2us
 spec:
   mtls:
-    mode: PERMISSIVE
+    mode: STRICT
