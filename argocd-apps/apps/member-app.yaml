@@ -8,7 +8,7 @@ spec:
 
   source:
     repoURL: 'https://github.com/Profect-4th-IRUM/come2us-gitops.git'
-    path: charts/apps/member-service
+    path: charts/member-service
     targetRevision: develop
     helm:
       valueFiles:
