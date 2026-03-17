@@ -1,0 +1,151 @@
+name: Platform Change
+description: 공통 플랫폼/애드온 변경 요청
+title: "[Platform] "
+labels:
+  - type:platform
+body:
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Environment
+      description: 변경이 적용될 환경을 선택해주세요.
+      options:
+        - dev
+        - stage
+        - prod
+        - shared
+        - all
+    validations:
+      required: true
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Platform Component
+      description: 변경 대상 플랫폼 컴포넌트를 선택해주세요.
+      options:
+        - argocd
+        - ingress-nginx
+        - istio
+        - external-secrets
+        - cert-manager
+        - external-dns
+        - metrics-server
+        - prometheus
+        - grafana
+        - loki
+        - tempo
+        - fluent-bit
+        - cluster-autoscaler
+        - karpenter
+        - rbac
+        - namespace
+        - other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: change_type
+    attributes:
+      label: Change Type
+      options:
+        - new installation
+        - version upgrade
+        - configuration update
+        - enable/disable feature
+        - migration/refactor
+        - removal
+        - other
+    validations:
+      required: true
+
+  - type: textarea
+    id: current_state
+    attributes:
+      label: Current State
+      description: 현재 구성을 적어주세요.
+      placeholder: |
+        ex)
+        - ingress-nginx currently exposed via NLB
+        - external-secrets uses ClusterSecretStore
+        - grafana values managed in platform-values/grafana.yaml
+
+  - type: textarea
+    id: requested_change
+    attributes:
+      label: Requested Change
+      description: 어떤 변경을 원하는지 구체적으로 적어주세요.
+      placeholder: |
+        ex)
+        - ingress-nginx chart version 업그레이드
+        - Istio gateway values 수정
+        - external-dns annotation 정책 변경
+    validations:
+      required: true
+
+  - type: textarea
+    id: reason
+    attributes:
+      label: Reason
+      description: 변경 이유를 적어주세요.
+      placeholder: |
+        ex)
+        - 보안 패치 적용
+        - 운영 표준화
+        - 신규 환경 지원
+        - 장애 원인 제거
+    validations:
+      required: true
+
+  - type: textarea
+    id: risk
+    attributes:
+      label: Risk / Blast Radius
+      description: 영향 범위와 리스크를 적어주세요.
+      placeholder: |
+        ex)
+        - cluster-wide 영향 가능
+        - ingress 재시작 시 일시적 5xx 가능
+        - DNS 반영 지연 가능
+    validations:
+      required: true
+
+  - type: textarea
+    id: validation
+    attributes:
+      label: Validation / Monitoring
+      description: 변경 후 어떤 지표/상태를 확인할지 적어주세요.
+      placeholder: |
+        ex)
+        - ArgoCD app health 확인
+        - controller pod logs 확인
+        - target group health 확인
+        - certificate issuance 확인
+        - Grafana 대시보드 모니터링
+    validations:
+      required: true
+
+  - type: textarea
+    id: rollback
+    attributes:
+      label: Rollback Plan
+      description: 실패 시 복구 방안을 적어주세요.
+      placeholder: |
+        ex)
+        - 이전 chart version으로 rollback
+        - values revert
+        - 이전 Application revision으로 복구
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-check
+      options:
+        - label: 변경 대상 컴포넌트와 환경을 확인했습니다.
+          required: true
+        - label: blast radius를 검토했습니다.
+          required: true
+        - label: rollback 방안을 준비했습니다.
+          required: true

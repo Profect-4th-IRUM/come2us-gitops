@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Architecture / 운영 구조 논의
+    url: https://github.com/Profect-4th-IRUM/come2us-gitops/discussions
+    about: 운영 구조, 아키텍처, GitOps 방향성 논의는 Discussions를 사용해주세요.
