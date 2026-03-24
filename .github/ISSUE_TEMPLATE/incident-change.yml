@@ -1,0 +1,130 @@
+name: Incident / Emergency Change
+description: 운영 장애 또는 긴급 변경 요청
+title: "[Incident] "
+labels:
+  - type:incident
+  - priority:high
+body:
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      description: 장애 심각도를 선택해주세요.
+      options:
+        - sev1
+        - sev2
+        - sev3
+    validations:
+      required: true
+
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Environment
+      options:
+        - dev
+        - stage
+        - prod
+    validations:
+      required: true
+
+  - type: input
+    id: affected_service
+    attributes:
+      label: Affected Service / Component
+      description: 장애가 발생한 서비스 또는 컴포넌트를 적어주세요.
+      placeholder: ex) member / ingress-nginx / external-secrets
+    validations:
+      required: true
+
+  - type: textarea
+    id: symptom
+    attributes:
+      label: Symptom
+      description: 현재 어떤 증상이 발생했는지 적어주세요.
+      placeholder: |
+        ex)
+        - 502/504 다수 발생
+        - Pod CrashLoopBackOff
+        - ArgoCD sync 이후 ingress unavailable
+        - secret mount 실패
+    validations:
+      required: true
+
+  - type: textarea
+    id: suspected_cause
+    attributes:
+      label: Suspected Cause
+      description: 추정 원인이 있다면 적어주세요.
+      placeholder: |
+        ex)
+        - 잘못된 values 반영
+        - readiness probe misconfiguration
+        - secret reference mismatch
+        - ingress annotation 오류
+
+  - type: textarea
+    id: required_change
+    attributes:
+      label: Required GitOps Change
+      description: GitOps 레포에서 어떤 변경이 필요하다고 보는지 적어주세요.
+      placeholder: |
+        ex)
+        - 이전 revision으로 rollback
+        - ingress annotation 제거
+        - secret key reference 수정
+        - replica 수 긴급 상향
+    validations:
+      required: true
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: User / Business Impact
+      description: 사용자 영향 또는 비즈니스 영향을 적어주세요.
+      placeholder: |
+        ex)
+        - 로그인 불가
+        - 주문 API 장애
+        - 전체 서비스 외부 접근 불가
+    validations:
+      required: true
+
+  - type: textarea
+    id: validation
+    attributes:
+      label: Recovery Validation
+      description: 복구 완료 판단 기준을 적어주세요.
+      placeholder: |
+        ex)
+        - 5xx 비율 정상화
+        - Pod Ready 복구
+        - 주요 API smoke test 성공
+        - Grafana / CloudWatch 지표 정상화
+    validations:
+      required: true
+
+  - type: textarea
+    id: rollback
+    attributes:
+      label: Rollback / Mitigation Plan
+      description: 긴급 복구 또는 롤백 방안을 적어주세요.
+      placeholder: |
+        ex)
+        - 이전 commit revert
+        - 이전 image tag로 원복
+        - 임시로 replica scale-out
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: emergency_checklist
+    attributes:
+      label: Emergency Checklist
+      options:
+        - label: 장애 영향 환경을 확인했습니다.
+          required: true
+        - label: 긴급 변경 필요성을 확인했습니다.
+          required: true
+        - label: 복구/롤백 기준을 정리했습니다.
+          required: true

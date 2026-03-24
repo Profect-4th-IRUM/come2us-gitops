@@ -1,0 +1,21 @@
+image:
+  tag: "fb748e3"
+
+config:
+  PROFILE_ACTIVE: "prod"
+
+resources:
+  requests:
+    cpu: "500m"
+    memory: "1Gi"
+  limits:
+    cpu: "1500m"
+    memory: "2Gi"
+
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 55
+  scaleDown:
+    stabilizationWindowSeconds: 180

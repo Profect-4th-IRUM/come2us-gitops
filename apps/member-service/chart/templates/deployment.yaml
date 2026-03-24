@@ -1,0 +1,118 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "member-service.fullname" . }}
+  namespace: {{ .Values.namespace }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      app: {{ include "member-service.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "member-service.name" . }}
+    spec:
+      imagePullSecrets:
+        - name: {{ .Values.image.pullSecret }}
+      containers:
+        - name: {{ include "member-service.name" . }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          ports:
+            - containerPort: {{ .Values.container.port }}
+
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+
+          startupProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: {{ .Values.container.port }}
+            failureThreshold: 30
+            periodSeconds: 5
+            timeoutSeconds: 3
+
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: {{ .Values.container.port }}
+            initialDelaySeconds: 40
+            periodSeconds: 15
+            timeoutSeconds: 2
+            failureThreshold: 3
+
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: {{ .Values.container.port }}
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 5
+
+          envFrom:
+            - configMapRef:
+                name: {{ include "member-service.fullname" . }}-config
+
+          env:
+            - name: JWT_ACCESS_TOKEN_PRIVATE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "member-service.fullname" . }}-secret
+                  key: jwt-access-private-key
+
+            - name: JWT_ACCESS_TOKEN_PUBLIC_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "member-service.fullname" . }}-secret
+                  key: jwt-access-public-key
+
+            - name: JWT_REFRESH_TOKEN_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "member-service.fullname" . }}-secret
+                  key: jwt-refresh-secret
+
+            - name: WRITE_POSTGRESQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "member-service.fullname" . }}-secret
+                  key: write-db-password
+
+            - name: READ_POSTGRESQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "member-service.fullname" . }}-secret
+                  key: read-db-password
+
+            - name: DATA_REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "member-service.fullname" . }}-secret
+                  key: redis-password
+
+            - name: WRITE_POSTGRESQL_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "member-service.fullname" . }}-secret
+                  key: write-postgresql-host
+
+            - name: READ_POSTGRESQL_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "member-service.fullname" . }}-secret
+                  key: read-postgresql-host
+
+            - name: DATA_REDIS_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "member-service.fullname" . }}-secret
+                  key: data-redis-host
+
+            - name: CACHE_REDIS_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "member-service.fullname" . }}-secret
+                  key: cache-redis-host

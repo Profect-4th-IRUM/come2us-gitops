@@ -1,0 +1,33 @@
+global:
+  proxy:
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
+
+pilot:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  nodeSelector:
+    node_type: infra
+  tolerations:
+    - key: node_type
+      operator: Equal
+      value: infra
+      effect: NoSchedule
+
+meshConfig:
+  accessLogFile: /dev/stdout
+  enableTracing: true
+  defaultConfig:
+    tracing:
+      zipkin:
+        address: tempo.monitoring:9411

@@ -1,0 +1,8 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: come2us-mtls
+  namespace: come2us
+spec:
+  mtls:
+    mode: STRICT

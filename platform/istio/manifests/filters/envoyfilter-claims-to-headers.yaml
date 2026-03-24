@@ -1,0 +1,121 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: jwt-claim-to-header
+  namespace: istio-system
+spec:
+  workloadSelector:
+    labels:
+      istio: ingressgateway
+  configPatches:
+    - applyTo: HTTP_FILTER
+      match:
+        context: GATEWAY
+        listener:
+          filterChain:
+            filter:
+              name: envoy.filters.network.http_connection_manager
+              subFilter:
+                name: envoy.filters.http.router
+      patch:
+        operation: INSERT_BEFORE
+        value:
+          name: envoy.filters.http.lua
+          typed_config:
+            "@type": type.googleapis.com/envoy.extensions.filters.http.lua.v3.Lua
+            inlineCode: |
+              --------------------------------------
+              -- Base64 Decoder (Lua Pure)
+              --------------------------------------
+              local b='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+              local function base64_decode(data)
+                  data = string.gsub(data, '[^'..b..'=]', '')
+                  return (data:gsub('.', function(x)
+                      if (x == '=') then return '' end
+                      local r,f='',(b:find(x)-1)
+                      for i=6,1,-1 do r = r .. (f%2^i - f%2^(i-1) > 0 and '1' or '0') end
+                      return r;
+                  end):gsub('%d%d%d?%d?%d?%d?%d?%d?', function(x)
+                      if (#x ~= 8) then return '' end
+                      local c=0
+                      for i=1,8 do c = c + (x:sub(i,i)=='1' and 2^(8-i) or 0) end
+                      return string.char(c)
+                  end))
+              end
+
+              --------------------------------------
+              -- Main JWT Claim → Header Logic
+              --------------------------------------
+              function envoy_on_request(request_handle)
+                request_handle:logInfo("=== JWT Header Processing Start ===")
+
+                local auth = request_handle:headers():get("authorization")
+                if not auth then
+                  request_handle:logInfo("No authorization header")
+                  return
+                end
+
+                local token = string.match(auth, "Bearer%s+(.+)")
+                if not token then
+                  request_handle:logInfo("No Bearer token found")
+                  return
+                end
+
+                -- Split JWT
+                local dot1 = string.find(token, ".", 1, true)
+                local dot2 = dot1 and string.find(token, ".", dot1 + 1, true)
+                if not dot1 or not dot2 then
+                  request_handle:logInfo("Invalid JWT format")
+                  return
+                end
+
+                local payload_b64 = string.sub(token, dot1 + 1, dot2 - 1)
+                request_handle:logInfo("Payload (base64): " .. payload_b64)
+
+                -- URL-safe → normal base64
+                payload_b64 = payload_b64:gsub('-', '+'):gsub('_', '/')
+
+                -- Padding
+                local padding = #payload_b64 % 4
+                if padding > 0 then
+                  payload_b64 = payload_b64 .. string.rep('=', 4 - padding)
+                end
+
+                -- Decode base64 using Lua function
+                local decoded = base64_decode(payload_b64)
+                if not decoded or decoded == "" then
+                  request_handle:logErr("Base64 decode failed")
+                  return
+                end
+
+                request_handle:logInfo("Decoded payload: " .. decoded)
+
+                --------------------------------------
+                -- Extract Claims
+                --------------------------------------
+                local sub = string.match(decoded, '"sub"%s*:%s*"([^"]+)"')
+                if not sub then
+                  sub = string.match(decoded, '"sub"%s*:%s*(%d+)')
+                end
+
+                local authority = string.match(decoded, '"authority"%s*:%s*"([^"]+)"')
+
+                --------------------------------------
+                -- Add Headers
+                --------------------------------------
+                if sub then
+                  request_handle:headers():add("X-Member-Id", tostring(sub))
+                  request_handle:logInfo("Added X-Member-Id: " .. tostring(sub))
+                else
+                  request_handle:logInfo("No sub claim found")
+                end
+
+                if authority then
+                  request_handle:headers():add("X-Member-Role", tostring(authority))
+                  request_handle:logInfo("Added X-Member-Role: " .. tostring(authority))
+                else
+                  request_handle:logInfo("No authority claim found")
+                end
+
+                request_handle:logInfo("=== JWT Header Processing End ===")
+              end
