@@ -1,0 +1,19 @@
+image:
+  tag: "ebe475c"
+
+config:
+  PROFILE_ACTIVE: "prod"
+
+resources:
+  requests:
+    cpu: "600m"
+    memory: "1Gi"
+  limits:
+    cpu: "1800m"
+    memory: "2Gi"
+
+autoscaling:
+  enabled: true
+  minReplicas: 4
+  maxReplicas: 12
+  targetCPUUtilizationPercentage: 50

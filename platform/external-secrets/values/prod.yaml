@@ -1,0 +1,16 @@
+serviceAccount:
+  create: true
+  name: external-secrets
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::575141562964:role/come2us-external-secrets
+
+nodeSelector:
+  node_type: infra
+
+tolerations:
+  - key: node_type
+    operator: Equal
+    value: infra
+    effect: NoSchedule
+
+replicaCount: 2

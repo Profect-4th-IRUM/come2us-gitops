@@ -1,0 +1,23 @@
+image:
+  tag: "601edda"
+
+config:
+  PROFILE_ACTIVE: "prod"
+  NUM_OF_PARTITION: 3
+  NUM_OF_REPLICA: 3
+  PAYMENT_PAID_TOPIC_NAME: "payment-paid"
+  PAYMENT_FAILED_TOPIC_NAME: "payment-failed"
+
+resources:
+  requests:
+    cpu: "300m"
+    memory: "512Mi"
+  limits:
+    cpu: "1000m"
+    memory: "1536Mi"
+
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 55

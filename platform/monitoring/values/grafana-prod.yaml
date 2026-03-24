@@ -1,0 +1,39 @@
+nodeSelector:
+  node_type: infra
+
+tolerations:
+  - key: node_type
+    operator: Equal
+    value: infra
+    effect: NoSchedule
+
+persistence:
+  enabled: true
+  storageClassName: gp3
+  size: 5Gi
+
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+      - name: Prometheus
+        type: prometheus
+        url: http://prometheus-kube-prometheus-prometheus.monitoring:9090
+        isDefault: true
+      - name: Tempo
+        type: tempo
+        url: http://tempo.monitoring:3100
+      - name: Loki
+        type: loki
+        url: http://loki.monitoring:3100
+
+ingress:
+  enabled: true
+  ingressClassName: alb
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-northeast-2:575141562964:certificate/f69c4b94-9974-48fd-83e6-6d8d373d5be5
+  hosts:
+    - grafana.come2us.store

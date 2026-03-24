@@ -1,0 +1,16 @@
+clusterName: come2us-eks
+
+serviceAccount:
+  create: false
+  name: aws-load-balancer-controller
+
+nodeSelector:
+  node_type: infra
+
+tolerations:
+  - key: node_type
+    operator: Equal
+    value: infra
+    effect: NoSchedule
+
+replicaCount: 2

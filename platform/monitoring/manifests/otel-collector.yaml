@@ -1,0 +1,84 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otel-collector-config
+  namespace: istio-system
+data:
+  config.yaml: |
+    receivers:
+      zipkin:
+      otlp:
+        protocols:
+          grpc:
+          http:
+
+    processors:
+      batch:
+
+    exporters:
+      otlp:
+        endpoint: tempo.monitoring.svc.cluster.local:4317
+        tls:
+          insecure: true
+
+      logging:
+        loglevel: debug
+
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp, zipkin]
+          processors: [batch]
+          exporters: [otlp, logging]
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: otel-collector
+  namespace: istio-system
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: otel-collector
+  template:
+    metadata:
+      labels:
+        app: otel-collector
+    spec:
+      nodeSelector:
+        node_type: "infra"
+      tolerations:
+        - key: "node_type"
+          operator: "Equal"
+          value: "infra"
+          effect: "NoSchedule"
+      containers:
+        - name: otel-collector
+          image: otel/opentelemetry-collector-contrib:0.99.0
+          args: ["--config=/etc/otel/config.yaml"]
+          volumeMounts:
+            - name: otel-config
+              mountPath: /etc/otel
+      volumes:
+        - name: otel-config
+          configMap:
+            name: otel-collector-config
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: otel-collector
+  namespace: istio-system
+spec:
+  ports:
+    - port: 9411
+      name: zipkin
+      targetPort: 9411
+    - port: 4317
+      name: otlp
+      targetPort: 4317
+  selector:
+    app: otel-collector

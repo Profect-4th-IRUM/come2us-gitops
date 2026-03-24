@@ -1,0 +1,106 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "product-service.fullname" . }}
+  namespace: {{ .Values.namespace }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      app: {{ include "product-service.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "product-service.name" . }}
+    spec:
+      imagePullSecrets:
+        - name: {{ .Values.image.pullSecret }}
+      containers:
+        - name: {{ include "product-service.name" . }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          ports:
+            - containerPort: {{ .Values.container.port }}
+
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+
+          startupProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: {{ .Values.container.port }}
+            failureThreshold: 30
+            periodSeconds: 5
+            timeoutSeconds: 3
+
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: {{ .Values.container.port }}
+            initialDelaySeconds: 40
+            periodSeconds: 15
+            timeoutSeconds: 2
+            failureThreshold: 3
+
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: {{ .Values.container.port }}
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 5
+
+          envFrom:
+            - configMapRef:
+                name: {{ include "product-service.fullname" . }}-config
+
+          env:
+            - name: WRITE_POSTGRESQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "product-service.fullname" . }}-secret
+                  key: write-db-password
+
+            - name: READ_POSTGRESQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "product-service.fullname" . }}-secret
+                  key: read-db-password
+
+            - name: DATA_REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "product-service.fullname" . }}-secret
+                  key: redis-password
+
+            - name: WRITE_POSTGRESQL_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "member-service.fullname" . }}-secret
+                  key: write-postgresql-host
+
+            - name: READ_POSTGRESQL_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "member-service.fullname" . }}-secret
+                  key: read-postgresql-host
+
+            - name: DATA_REDIS_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "member-service.fullname" . }}-secret
+                  key: data-redis-host
+
+            - name: CACHE_REDIS_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "member-service.fullname" . }}-secret
+                  key: cache-redis-host
+
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "payment-service.fullname" . }}-secret
+                  key: kafka-bootstrap-servers

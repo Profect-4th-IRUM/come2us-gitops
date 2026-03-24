@@ -1,0 +1,15 @@
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: mtls-default
+  namespace: come2us
+spec:
+  host: "*.come2us.svc.cluster.local"
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+    outlierDetection:
+      consecutive5xxErrors: 3
+      interval: 10s
+      baseEjectionTime: 30s
+      maxEjectionPercent: 100
