@@ -1,0 +1,34 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: product-service
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: apps
+  source:
+    repoURL: https://github.com/Profect-4th-IRUM/come2us-gitops
+    targetRevision: main
+    path: apps/product-service/chart
+    helm:
+      valueFiles:
+        - values.yaml
+        - ../values/prod.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: come2us
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+  ignoreDifferences:
+    - group: external-secrets.io
+      kind: ExternalSecret
+      jsonPointers:
+        - /status
+        - /metadata/annotations
+        - /spec/data

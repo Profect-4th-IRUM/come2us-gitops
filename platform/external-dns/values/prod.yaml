@@ -1,0 +1,27 @@
+provider:
+  name: aws
+
+env:
+  - name: AWS_DEFAULT_REGION
+    value: ap-northeast-2
+
+serviceAccount:
+  name: external-dns
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::575141562964:role/come2us-external-dns
+
+policy: upsert-only
+registry: txt
+txtOwnerId: come2us-eks
+
+domainFilters:
+  - come2us.store
+
+nodeSelector:
+  node_type: infra
+
+tolerations:
+  - key: node_type
+    operator: Equal
+    value: infra
+    effect: NoSchedule

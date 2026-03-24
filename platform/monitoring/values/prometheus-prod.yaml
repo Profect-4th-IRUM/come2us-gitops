@@ -1,0 +1,30 @@
+grafana:
+  enabled: false
+
+alertmanager:
+  enabled: true
+
+prometheus:
+  prometheusSpec:
+    nodeSelector:
+      node_type: infra
+    tolerations:
+      - key: node_type
+        operator: Equal
+        value: infra
+        effect: NoSchedule
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: gp3
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 20Gi
+    retention: 7d
+
+nodeExporter:
+  enabled: true
+
+kubeStateMetrics:
+  enabled: true

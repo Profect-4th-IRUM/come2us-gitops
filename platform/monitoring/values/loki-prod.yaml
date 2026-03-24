@@ -1,0 +1,28 @@
+loki:
+  commonConfig:
+    replication_factor: 1
+  storage:
+    type: filesystem
+
+singleBinary:
+  replicas: 1
+  nodeSelector:
+    node_type: infra
+  tolerations:
+    - key: node_type
+      operator: Equal
+      value: infra
+      effect: NoSchedule
+  persistence:
+    enabled: true
+    storageClassName: gp3
+    size: 10Gi
+
+monitoring:
+  selfMonitoring:
+    enabled: false
+  lokiCanary:
+    enabled: false
+
+test:
+  enabled: false

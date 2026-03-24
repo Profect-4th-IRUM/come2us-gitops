@@ -1,0 +1,20 @@
+settings:
+  clusterName: come2us-eks
+  clusterEndpoint: https://A355706176BEBCF5EBEC2FDEAC54F248.gr7.ap-northeast-2.eks.amazonaws.com
+  interruptionQueue: Karpenter-come2us-eks
+
+serviceAccount:
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::575141562964:role/KarpenterController-20260317062349196400000005
+
+nodeSelector:
+  karpenter.sh/controller: "true"
+
+tolerations:
+  - key: node_type
+    operator: Equal
+    value: infra
+    effect: NoSchedule
+
+webhook:
+  enabled: false

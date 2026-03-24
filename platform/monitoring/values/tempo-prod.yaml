@@ -1,0 +1,15 @@
+tempo:
+  nodeSelector:
+    node_type: infra
+  tolerations:
+    - key: node_type
+      operator: Equal
+      value: infra
+      effect: NoSchedule
+  storage:
+    trace:
+      backend: local
+  persistence:
+    enabled: true
+    storageClassName: gp3
+    size: 10Gi
